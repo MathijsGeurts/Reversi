@@ -1,0 +1,105 @@
+using System;
+using System.Windows.Forms;
+using System.Drawing;
+
+namespace Spel
+{
+    class Program
+    {
+        static void Main()
+        {
+            Application.Run(new Scherm());
+        }
+    }
+
+    class Scherm : Form
+
+    {
+        Button nieuwspel, help;
+        Panel paneel;
+        Label beurt;
+        public int vakX = 8;
+        public int vakY = 8;
+        int[,] kader = new int[8, 8];
+        
+
+        public Scherm()
+
+        {
+       
+            this.Size = new Size(500, 500);
+            this.Text = "Reversi";
+            this.BackColor = Color.White;
+
+            nieuwspel = new Button();
+            help = new Button();
+            paneel = new Panel();
+            beurt = new Label();
+
+            nieuwspel.Location = new Point(10, 10);
+            nieuwspel.ClientSize = new Size(50, 50);
+            nieuwspel.Text = "Nieuw Spel";
+            nieuwspel.BackColor = Color.Blue;
+            nieuwspel.Click += nieuwspelklik;
+            this.Controls.Add(nieuwspel);
+
+            help.Location = new Point(70, 10);
+            help.ClientSize = new Size(50, 50);
+            help.Text = "Help";
+            help.BackColor = Color.Red;
+            this.Controls.Add(help);
+
+            paneel.Location = new Point(10, 70);
+            paneel.ClientSize = new Size(400, 400);
+            paneel.Paint += bord;
+            paneel.BackColor = Color.Black;
+            paneel.Click += klik;
+            this.Controls.Add(paneel);
+
+            beurt.Location = new Point(150, 30);
+            beurt.Text = beurttekst(0);
+            beurt.Size = new Size(150, 50);
+            this.Controls.Add(beurt);
+            
+
+
+        }
+
+        void klik(object o, EventArgs e)
+
+        {
+
+        }
+
+
+        void nieuwspelklik(object o, EventArgs e)
+
+        {
+
+        }
+
+        void bord(object o, PaintEventArgs p)
+        {
+            Graphics gr;
+            gr = p.Graphics;
+            for (int t = 0; t < vakX; t++)
+            gr.DrawLine(Pens.White, 400/vakX*t, 0, 400/vakX*t, 400);
+
+            for (int t = 0; t<vakY; t++)
+            gr.DrawLine(Pens.White, 0, 400/vakY*t, 400 , 400/vakY*t);
+        }
+
+        public string beurttekst(int t)
+
+        { string res = "";
+            if (t == 0)
+                res = "Rood is aan de beurt";
+            if (t == 1)
+                res = "Blauw is aan de beurt";
+            return res;
+
+        }
+
+    }
+
+}
