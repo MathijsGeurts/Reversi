@@ -1,0 +1,143 @@
+using System;
+using System.Windows.Forms;
+using System.Drawing;
+
+namespace Spel
+{
+    class Program
+    {
+        static void Main()
+        {
+            Application.Run(new Scherm());
+        }
+    }
+
+    class Scherm : Form
+
+    {
+        Button nieuwspel, help;
+        Panel paneel;
+        Label beurt;
+        const int vakX = 5;
+        const int vakY = 8;
+        public int[,] kader;
+        double[] X;
+        double [] Y;
+        public int aantal;
+        public int maxAantal = 1000;
+        const int diameter = 40;
+        
+
+        public Scherm()
+
+        {
+       
+            this.Size = new Size(500, 500);
+            this.Text = "Reversi";
+            this.aantal = 0;
+            this.BackColor = Color.White;
+            this.X = new double[maxAantal];
+            this.Y = new double[maxAantal];
+
+            nieuwspel = new Button();
+            help = new Button();
+            paneel = new Panel();
+            beurt = new Label();
+
+            nieuwspel.Location = new Point(10, 10);
+            nieuwspel.ClientSize = new Size(50, 50);
+            nieuwspel.Text = "Nieuw Spel";
+            nieuwspel.BackColor = Color.Blue;
+            nieuwspel.Click += nieuwspelklik;
+            this.Controls.Add(nieuwspel);
+
+            help.Location = new Point(70, 10);
+            help.ClientSize = new Size(50, 50);
+            help.Text = "Help";
+            help.BackColor = Color.Red;
+            this.Controls.Add(help);
+
+            paneel.Location = new Point(10, 70);
+            paneel.ClientSize = new Size(vakX * 50, vakY * 50);
+            paneel.Paint += bord;
+            paneel.Paint += stenen;
+            paneel.BackColor = Color.Black;
+            paneel.MouseClick += klik;
+            this.Controls.Add(paneel);
+
+            beurt.Location = new Point(150, 30);
+            beurt.Text = beurttekst(0);
+            beurt.Size = new Size(150, 50);
+            this.Controls.Add(beurt);
+            beurt.Invalidate();
+
+
+        }
+
+        void klik(object o, MouseEventArgs m)
+
+        {
+            
+
+            if (this.aantal < maxAantal)
+            {
+                int vakx = m.X - (m.X % 50);
+                int vaky = m.Y - (m.Y % 50);
+                this.X[aantal] = vakx + 5;
+                this.Y[aantal] = vaky + 5;
+                this.aantal++;
+                paneel.Invalidate();
+                
+            }
+
+
+ 
+        }
+
+        void stenen(object o, PaintEventArgs p)
+
+        {
+
+        }
+
+
+        void nieuwspelklik(object o, EventArgs e)
+
+        {
+
+        }
+
+        void bord(object o, PaintEventArgs p)
+        {
+            Graphics gr;
+            gr = p.Graphics;
+            for (int t = 0; t < vakX; t++)
+            gr.DrawLine(Pens.White, 50*t, 0, 50*t, vakY * 50 + 50);
+
+            for (int t = 0; t<vakY; t++)
+            gr.DrawLine(Pens.White, 0, 50*t, vakX * 50 , 50*t);
+
+
+            for (int t = 0; X[t] != 0 && t < maxAantal; t++)
+            {
+                if (Math.Pow(-1, t) == -1)
+                    gr.FillEllipse(Brushes.Red, (float)X[t], (float)Y[t], diameter, diameter);
+                else 
+                    gr.FillEllipse(Brushes.Blue, (float)X[t], (float)Y[t], diameter, diameter);
+            }
+            }
+
+        public string beurttekst(int t)
+
+        { string res = "";
+            if (Math.Pow( -1, aantal) == -1)
+                res = "Rood is aan de beurt";
+            if (Math.Pow(-1, aantal) == 1)
+                res = "Blauw is aan de beurt";
+            return res;
+            
+        }
+
+    }
+
+}
