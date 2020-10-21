@@ -1,0 +1,319 @@
+using System;
+using System.Drawing;
+using System.Security.Cryptography;
+using System.Windows.Forms;
+
+namespace Spel
+{
+    class Program
+    {
+        static void Main()
+        {
+            Application.Run(new Scherm());
+        }
+    }
+    enum Tegel
+    {
+        Leeg, Blauw, Rood
+    }
+
+    class Scherm : Form
+    {
+        Button nieuwspel, help;
+        Panel paneel;
+        Label beurt, rodestenen, blauwestenen;
+        const int vakX = 8;
+        const int vakY = 8;
+        int helpAan = 0;
+        public int[,] grid;
+        const int diameter = 40;
+        Graphics g;
+        Tegel aanDeBeurt;
+
+
+        public Scherm()
+        {
+
+            this.Size = new Size(vakX * 50 + 100, vakY * 50 + 200);
+            this.Text = "Reversi";
+            this.BackColor = Color.White;
+            this.Paint += circels;
+
+            nieuwspel = new Button();
+            help = new Button();
+            paneel = new Panel();
+            beurt = new Label();
+            rodestenen = new Label();
+            blauwestenen = new Label();
+
+
+            grid = new int[vakX, vakY];
+            aanDeBeurt = Tegel.Blauw;
+
+            nieuwspel.Location = new Point(10, 10);
+            nieuwspel.ClientSize = new Size(50, 50);
+            nieuwspel.Text = "Nieuw Spel";
+            nieuwspel.BackColor = Color.Blue;
+            nieuwspel.Click += nieuwspelklik;
+            this.Controls.Add(nieuwspel);
+
+            help.Location = new Point(70, 10);
+            help.ClientSize = new Size(50, 50);
+            help.Text = "Help";
+            help.BackColor = Color.Red;
+            help.Click += Hulp;
+            this.Controls.Add(help);
+
+            paneel.Location = new Point(10, 70);
+            paneel.ClientSize = new Size(vakX * 50, vakY * 50);
+            paneel.Paint += TekenBord;
+            paneel.BackColor = Color.Black;
+            paneel.MouseClick += klik;
+            this.Controls.Add(paneel);
+
+            beurt.Location = new Point(150, 30);
+            beurt.Text = beurttekst();
+            beurt.Size = new Size(150, 50);
+            this.Controls.Add(beurt);
+            beurt.Invalidate();
+
+            rodestenen.Location = new Point(325, 15);
+            rodestenen.Text = Rtekst();
+            rodestenen.Size = new Size(150, 30);
+            this.Controls.Add(rodestenen);
+
+            blauwestenen.Location = new Point(325, 45);
+            blauwestenen.Text = Btekst();
+            blauwestenen.Size = new Size(150, 60);
+            this.Controls.Add(blauwestenen);
+
+
+
+        }
+
+        public string Rtekst()
+        {
+            int rstenen = 0;
+            string res;
+            res = ": " + rstenen.ToString() + " stenen";
+            return res;
+        }
+
+        public string Btekst()
+
+        {
+            string res;
+            int bstenen = 0;
+
+            for (int t = 1; t < vakX; t++)
+            {
+                for (int n = 1; n < vakY; n++)
+                    if (1 == grid[t, n])
+                        bstenen++;
+
+
+            }
+
+            res = ": " + bstenen.ToString() + " stenen";
+            return res;
+        }
+
+
+        void circels(object o, PaintEventArgs pea)
+
+        {
+            g = pea.Graphics;
+            g.FillEllipse(Brushes.Blue, 300, 40, 25, 25);
+            g.FillEllipse(Brushes.Red, 300, 10, 25, 25);
+        }
+
+
+        void Hulp(object o, EventArgs a)
+
+        {
+            if (helpAan == 1)
+                helpAan = 0;
+            else helpAan = 1;
+
+            paneel.Invalidate();
+        }
+
+        void klik(object o, MouseEventArgs m)
+        {
+           
+                int x = (m.X - (m.X % 50)) / 50;
+                int y = (m.Y - (m.Y % 50)) / 50;
+
+
+                if (LegaleZet((int)aanDeBeurt, x, y))
+                {
+                    Zet((int)aanDeBeurt, x, y);
+                    if (aanDeBeurt == Tegel.Blauw)
+                        aanDeBeurt = Tegel.Rood;
+                    else
+                        aanDeBeurt = Tegel.Blauw;
+                    beurt.Text = beurttekst();
+                    paneel.Invalidate();
+                }
+           
+
+        }
+
+
+        void nieuwspelklik(object o, EventArgs e)
+        {
+            grid = new int[vakX, vakY];
+            //-1 wegens rekening houden met 0-based index
+            grid[(vakX / 2) - 1, (vakY / 2) - 1] = (int)Tegel.Blauw;
+            grid[(vakX / 2), (vakY / 2) - 1] = (int)Tegel.Rood;
+            grid[(vakX / 2) - 1, (vakY / 2)] = (int)Tegel.Rood;
+            grid[(vakX / 2), (vakY / 2)] = (int)Tegel.Blauw;
+            paneel.Invalidate();
+        }
+
+        void TekenBord(object o, PaintEventArgs p)
+        { 
+            g = p.Graphics;
+            //teken lijnen
+            for (int t = 0; t < vakX; t++)
+                g.DrawLine(Pens.White, 50 * t, 0, 50 * t, vakY * 50 + 50);
+
+            for (int t = 0; t < vakY; t++)
+                g.DrawLine(Pens.White, 0, 50 * t, vakX * 50, 50 * t);
+
+        if (helpAan == 1)
+        {
+                for (int t = 0; t < vakX; t++)
+
+                {
+
+                    for (int n = 0; n < vakY; n++)
+                    {
+                        if (LegaleZet((int)aanDeBeurt, t, n))
+                        {
+                            g.FillEllipse(Brushes.White, t * 50 + 10, n * 50 + 10, 30, 30);
+                        }
+                    }
+
+                }
+                
+
+            
+        }
+            for (int i = 0; i < vakX; i++)
+            {
+                for (int j = 0; j < vakY; j++)
+                {
+                    if (grid[i, j] == (int)Tegel.Blauw)
+                    {
+                        g.FillEllipse(Brushes.Blue, (i * 50) + 5, (j * 50) + 5, diameter, diameter);
+                    }
+                    else if (grid[i, j] == (int)Tegel.Rood)
+                    {
+                        g.FillEllipse(Brushes.Red, (i * 50) + 5, (j * 50) + 5, diameter, diameter);
+                    }
+                }
+            }
+        }
+
+        public string beurttekst()
+        {
+            string res;
+            if (aanDeBeurt == Tegel.Blauw)
+                res = "Blauw is aan de beurt";
+            else
+                res = "Rood is aan de beurt";
+            return res;
+
+        }
+
+        public bool LegaleZet(int beurt, int rij, int kol)
+
+        {
+            int oppCol = 1;
+            if (beurt == 1)
+            {
+                oppCol = 2;
+            }
+
+            if ((int)grid[rij, kol] == 0)
+            {
+                for (int t = 0; t < vakX || t < vakY; t++)
+
+                {
+                    if (rij < vakX && kol + 2 + t < vakY && grid[rij, kol + 2 + t] == beurt && kol + 1 < vakY && grid[rij, kol + 1] == oppCol)
+                        return true;
+
+                    else if (rij + 2 + t < vakX && kol + 2 + t < vakY && grid[rij + 2 + t, kol + 2 + t] == beurt && rij + 1 < vakX && kol + 1 < vakY && grid[rij + 1, kol + 1] == oppCol)
+                        return true;
+
+                    else if (rij - 2 - t > 0 && kol + 2 + t < vakY && grid[rij - 2 - t, kol + 2 + t] == beurt && rij - 1 > -1 && kol + 1 < vakY && grid[rij - 1, kol + 1] == oppCol)
+                        return true;
+
+                    else if (kol - 2 - t > 0 && grid[rij, kol - 2 - t] == beurt && kol - 1 > -1 && grid[rij, kol - 1] == oppCol)
+                        return true;
+
+                    else if (rij + 2 + t < vakX && kol - 2 - t > 0 && grid[rij + 2 + t, kol - 2 - t] == beurt && rij + 1 < vakX && kol - 1 > -1 && grid[rij + 1, kol - 1] == oppCol)
+                        return true;
+
+                    else if (rij - 2 - t > 0  && kol - 2 - t > 0 && grid[rij - 2 - t, kol - 2 - t] == beurt && rij - 1 > -1 && kol - 1 > -1 && grid[rij - 1, kol - 1] == oppCol)
+                        return true;
+
+                    else if (rij + 2 + t < vakX &&  grid[rij + 2 + t, kol] == beurt && rij + 1 < vakX && grid[rij + 1, kol] == oppCol)
+                        return true;
+
+                    else if (rij - 2 - t > 0 &&  grid[rij - 2 - t, kol] == beurt && rij - 1 > -1 && grid[rij - 1, kol] == oppCol)
+                        return true;
+                }
+               
+            } 
+            return false;
+        }
+
+        
+        public void Zet(int beurt, int rij, int kol)
+        {
+            grid[rij, kol] = beurt;
+            Richting(rij, kol, beurt, 0, -1);
+            Richting(rij, kol, beurt, 0, 1);
+            Richting(rij, kol, beurt, 1, 0);
+            Richting(rij, kol, beurt, -1, 0);
+            Richting(rij, kol, beurt, 1, 1);
+            Richting(rij, kol, beurt, 1, -1);
+            Richting(rij, kol, beurt, -1, 1);
+            Richting(rij, kol, beurt, -1, -1);
+
+        }
+        private void Richting(int rij, int kol, int kleur, int kleurD, int rijD)
+        {
+            int dezeRij = rij + rijD;
+            int dezeKol = kol + kleurD;
+            if (dezeRij == 8 || dezeRij < 0 || dezeKol == 8 || dezeKol < 0)
+            {
+                return;
+            }
+            while (grid[dezeRij, dezeKol] == 1 || grid[dezeRij, dezeKol] == 2)
+            {
+                if (grid[dezeRij, dezeKol] == kleur)
+                {
+                    while (!(rij == dezeRij && kol == dezeKol))
+                    {
+                        grid[dezeRij, dezeKol] = kleur;
+                        dezeRij = dezeRij - rijD;
+                        dezeKol = dezeKol - kleurD;
+                    }
+                    break;
+                }
+                else
+                {
+                    dezeRij = dezeRij + rijD;
+                    dezeKol = dezeKol + kleurD;
+                }
+                if (dezeRij < 0 || dezeKol < 0 || dezeRij == 8 || dezeKol == 8)
+                {
+                    break;
+                }
+            }
+        }
+    }
+}
