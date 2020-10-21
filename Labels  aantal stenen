@@ -1,0 +1,48 @@
+   //Declaraties
+   
+   Label rodestenen, blauwestenen;
+   
+   //Constructormethode
+   
+    rodestenen = new Label();
+            blauwestenen = new Label();
+            
+             rodestenen.Location = new Point(325, 15);
+            rodestenen.Text = Rtekst();
+            rodestenen.Size = new Size(150, 30);
+            this.Controls.Add(rodestenen);
+
+            blauwestenen.Location = new Point(325, 45);
+            blauwestenen.Text = Btekst();
+            blauwestenen.Size = new Size(150, 60);
+            this.Controls.Add(blauwestenen);
+   
+   public string Rtekst()
+        {
+            int rstenen = 0;
+            string res;
+            res = ": " + rstenen.ToString() + " stenen";
+            return res;
+        }
+
+        public string Btekst()
+       
+            {
+                string res;
+                int bstenen = 0;
+
+            for (int t = 1; t < vakX; t++)
+            {
+                for (int n = 1; n < vakY; n++)
+                if (1 == grid[t, n]) 
+                bstenen++;
+
+
+            }
+                
+                res = ": " + bstenen.ToString() + " stenen";
+                return res;
+            }
+
+        
+
